@@ -64,35 +64,60 @@ pipeline {
                 script {
                     echo 'Deploying to Azure Functions...'
                     bat '''
-                        REM Create a simple deployment verification
-                        echo Creating deployment package for Azure Functions...
-                        echo Function App: lab4-function-sahil
-                        echo Resource Group: Lab4ResourceGroup
-                        echo Package: function.zip
-                        
-                        REM Verify the package was created
-                        if exist function.zip (
-                            echo Deployment package created successfully!
-                            echo Package size: 
-                            dir function.zip
+                        REM Check if Azure CLI is available
+                        where az >nul 2>&1
+                        if %errorlevel% neq 0 (
+                            echo Azure CLI not found, installing...
+                            REM Download and install Azure CLI
+                            powershell -Command "Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile azure-cli-installer.msi"
+                            msiexec /i azure-cli-installer.msi /quiet /norestart
+                            echo Azure CLI installation completed
                         ) else (
-                            echo ERROR: Deployment package not found!
-                            exit 1
+                            echo Azure CLI found
                         )
                         
-                        echo Deployment preparation completed successfully!
-                        echo Function URL: https://lab4-function-sahil.azurewebsites.net/api/HttpExample
+                        REM Login to Azure using Service Principal
+                        echo Logging into Azure...
+                        az login --service-principal -u %AZURE_CLIENT_ID% -p %AZURE_CLIENT_SECRET% --tenant %AZURE_TENANT_ID%
+                        
+                        REM Set subscription
+                        echo Setting subscription...
+                        az account set --subscription %AZURE_SUBSCRIPTION_ID%
+                        
+                        REM Check if Function App exists, if not create it
+                        echo Checking if Function App exists...
+                        az functionapp show --name %FUNCTION_APP_NAME% --resource-group %RESOURCE_GROUP% >nul 2>&1
+                        if %errorlevel% neq 0 (
+                            echo Function App does not exist, creating...
+                            REM Create storage account if needed
+                            az storage account create --name %FUNCTION_APP_NAME%storage --resource-group %RESOURCE_GROUP% --location canadacentral --sku Standard_LRS
+                            
+                            REM Create Function App
+                            az functionapp create --resource-group %RESOURCE_GROUP% --consumption-plan-location canadacentral --runtime node --runtime-version 18 --functions-version 4 --name %FUNCTION_APP_NAME% --storage-account %FUNCTION_APP_NAME%storage
+                            echo Function App created successfully
+                        ) else (
+                            echo Function App already exists
+                        )
+                        
+                        REM Deploy the function app
+                        echo Deploying function app...
+                        az functionapp deployment source config-zip --resource-group %RESOURCE_GROUP% --name %FUNCTION_APP_NAME% --src function.zip
+                        
+                        echo Deployment completed successfully!
+                        echo Function URL: https://%FUNCTION_APP_NAME%.azurewebsites.net/api/HttpExample
                     '''
                 }
             }
             post {
                 success {
-                    echo 'Deployment preparation successful!'
+                    echo 'Deployment successful!'
                     echo "Function URL: https://%FUNCTION_APP_NAME%.azurewebsites.net/api/HttpExample"
-                    echo "Note: Function is already deployed and working in Azure"
+                    echo "Function App: %FUNCTION_APP_NAME%"
+                    echo "Resource Group: %RESOURCE_GROUP%"
                 }
                 failure {
-                    echo 'Deployment preparation failed!'
+                    echo 'Deployment failed!'
+                    echo 'Check Azure credentials and permissions'
                 }
             }
         }
