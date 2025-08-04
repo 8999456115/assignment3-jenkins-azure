@@ -3,8 +3,8 @@ pipeline {
     
     environment {
         // Azure Function App Configuration
-        FUNCTION_APP_NAME = 'assignment-3-8947486'
-        RESOURCE_GROUP = 'assignment3-rg'
+        FUNCTION_APP_NAME = 'lab4-function-sahil'
+        RESOURCE_GROUP = 'Lab4ResourceGroup'
         
         // Azure Service Principal Credentials (set these in Jenkins credentials)
         AZURE_CLIENT_ID = credentials('AZURE_CLIENT_ID')
@@ -25,7 +25,7 @@ pipeline {
             steps {
                 script {
                     echo 'Building the application...'
-                    sh 'npm install'
+                    bat 'npm install'
                     echo 'Build completed successfully!'
                 }
             }
@@ -35,7 +35,7 @@ pipeline {
             steps {
                 script {
                     echo 'Running tests...'
-                    sh 'npm test'
+                    bat 'npm test'
                     echo 'All tests passed!'
                 }
             }
@@ -50,10 +50,10 @@ pipeline {
             steps {
                 script {
                     echo 'Packaging the application...'
-                    sh '''
-                        # Create deployment package
-                        zip -r function.zip . -x "node_modules/*" "tests/*" "test-server.js" "*.test.js" ".git/*" "Jenkinsfile"
-                        echo "Package created: function.zip"
+                    bat '''
+                        REM Create deployment package
+                        powershell -Command "Compress-Archive -Path . -DestinationPath function.zip -Force -Exclude 'node_modules/*','tests/*','test-server.js','*.test.js','.git/*','Jenkinsfile'"
+                        echo Package created: function.zip
                     '''
                 }
             }
@@ -63,24 +63,24 @@ pipeline {
             steps {
                 script {
                     echo 'Deploying to Azure Functions...'
-                    sh '''
-                        # Login to Azure using Service Principal
-                        az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
+                    bat '''
+                        REM Login to Azure using Service Principal
+                        az login --service-principal -u %AZURE_CLIENT_ID% -p %AZURE_CLIENT_SECRET% --tenant %AZURE_TENANT_ID%
                         
-                        # Set subscription
-                        az account set --subscription $AZURE_SUBSCRIPTION_ID
+                        REM Set subscription
+                        az account set --subscription %AZURE_SUBSCRIPTION_ID%
                         
-                        # Deploy the function app
-                        az functionapp deployment source config-zip --resource-group $RESOURCE_GROUP --name $FUNCTION_APP_NAME --src function.zip
+                        REM Deploy the function app
+                        az functionapp deployment source config-zip --resource-group %RESOURCE_GROUP% --name %FUNCTION_APP_NAME% --src function.zip
                         
-                        echo "Deployment completed successfully!"
+                        echo Deployment completed successfully!
                     '''
                 }
             }
             post {
                 success {
                     echo 'Deployment successful!'
-                    echo "Function URL: https://$FUNCTION_APP_NAME.azurewebsites.net/api/HttpExample"
+                    echo "Function URL: https://%FUNCTION_APP_NAME%.azurewebsites.net/api/HttpExample"
                 }
                 failure {
                     echo 'Deployment failed!'
@@ -92,7 +92,6 @@ pipeline {
     post {
         always {
             echo 'Pipeline completed!'
-            cleanWs()
         }
         success {
             echo 'All stages completed successfully!'
