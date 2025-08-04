@@ -52,7 +52,7 @@ pipeline {
                     echo 'Packaging the application...'
                     bat '''
                         REM Create deployment package
-                        powershell -Command "Compress-Archive -Path . -DestinationPath function.zip -Force -Exclude 'node_modules/*','tests/*','test-server.js','*.test.js','.git/*','Jenkinsfile'"
+                        powershell -Command "Get-ChildItem -Path . -Exclude 'node_modules','tests','test-server.js','*.test.js','.git','Jenkinsfile' | Compress-Archive -DestinationPath function.zip -Force"
                         echo Package created: function.zip
                     '''
                 }
