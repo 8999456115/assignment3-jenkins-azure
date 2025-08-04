@@ -1,8 +1,8 @@
 # Assignment 3: Jenkins CI/CD Pipeline for Azure Functions
 
 **Student:** Sahil Sorathiya  
-**Student ID:** 8999456115  
-**Course:** DevOps and CI/CD  
+**Student ID:** 8947486  
+**Course:** Continuous Integration/Continuous Delivery (CI/CD)
 **Repository:** https://github.com/8999456115/assignment3-jenkins-azure.git
 
 This repository contains a complete CI/CD pipeline implementation using Jenkins to deploy a "Hello World" Azure Function to Azure Functions. The project demonstrates the full DevOps lifecycle from code development to automated deployment.
@@ -231,10 +231,11 @@ The project includes **5 comprehensive test cases** executed during the Test sta
 ## 👨‍💻 Author
 
 **Sahil Sorathiya**  
-Student ID: 8999456115  
+Student ID: 8947486
 Course: DevOps and CI/CD  
 Assignment: Jenkins CI/CD Pipeline for Azure Functions
 
 ---
 
 *This project demonstrates a complete CI/CD pipeline implementation using Jenkins, GitHub, and Azure Functions, fulfilling all assignment requirements for 100% completion.*
+
