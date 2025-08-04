@@ -3,7 +3,7 @@ pipeline {
     
     environment {
         // Azure Function App Configuration
-        FUNCTION_APP_NAME = 'lab4-function-sahil'
+        FUNCTION_APP_NAME = 'assignment-3-8947486'
         RESOURCE_GROUP = 'Lab4ResourceGroup'
         
         // Azure Service Principal Credentials (set these in Jenkins credentials)
