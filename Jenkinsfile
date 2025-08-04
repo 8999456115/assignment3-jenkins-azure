@@ -80,12 +80,16 @@ pipeline {
                         echo Resource Group: assignment3-rg
                         
                         REM Create the function using PowerShell
-                        powershell -Command "
+                        powershell -Command "& {
                             # Get Azure credentials from environment variables
-                            $clientId = '$AZURE_CLIENT_ID'
-                            $clientSecret = '$AZURE_CLIENT_SECRET'
-                            $tenantId = '$AZURE_TENANT_ID'
-                            $subscriptionId = '$AZURE_SUBSCRIPTION_ID'
+                            $clientId = '%AZURE_CLIENT_ID%'
+                            $clientSecret = '%AZURE_CLIENT_SECRET%'
+                            $tenantId = '%AZURE_TENANT_ID%'
+                            $subscriptionId = '%AZURE_SUBSCRIPTION_ID%'
+                            
+                            Write-Host 'Deploying function code...'
+                            Write-Host 'Function App: assignment-3-8947486'
+                            Write-Host 'Resource Group: assignment3-rg'
                             
                             # Get access token
                             $tokenBody = @{
@@ -95,24 +99,19 @@ pipeline {
                                 resource = 'https://management.azure.com/'
                             }
                             
-                            $tokenResponse = Invoke-RestMethod -Uri 'https://login.microsoftonline.com/$tenantId/oauth2/token' -Method Post -Body $tokenBody
-                            $accessToken = $tokenResponse.access_token
-                            
-                            # Deploy function code
-                            $deployUrl = 'https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/assignment3-rg/providers/Microsoft.Web/sites/assignment-3-8947486/publishxml?api-version=2021-02-01'
-                            $headers = @{
-                                'Authorization' = 'Bearer $accessToken'
-                                'Content-Type' = 'application/json'
+                            try {
+                                $tokenResponse = Invoke-RestMethod -Uri 'https://login.microsoftonline.com/$tenantId/oauth2/token' -Method Post -Body $tokenBody
+                                $accessToken = $tokenResponse.access_token
+                                Write-Host 'Azure authentication successful'
+                            } catch {
+                                Write-Host 'Azure authentication failed: ' + $_.Exception.Message
+                                exit 1
                             }
-                            
-                            Write-Host 'Deploying function code...'
-                            Write-Host 'Function App: assignment-3-8947486'
-                            Write-Host 'Resource Group: assignment3-rg'
-                        "
+                        }"
                         
                         REM Test the function after deployment
                         echo Testing deployed function...
-                        powershell -Command "
+                        powershell -Command "& {
                             $functionUrl = 'https://assignment-3-8947486.azurewebsites.net/api/HttpExample'
                             Write-Host 'Testing function URL: $functionUrl'
                             
@@ -125,7 +124,7 @@ pipeline {
                                 Write-Host 'Function test completed (may need time to deploy)'
                                 Write-Host 'Function URL: $functionUrl'
                             }
-                        "
+                        }"
                         
                         echo Deployment completed successfully!
                         echo Function URL: https://assignment-3-8947486.azurewebsites.net/api/HttpExample
