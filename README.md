@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Assignment 3: Jenkins CI/CD Pipeline for Azure Functions
 
 This repository contains a complete CI/CD pipeline implementation using Jenkins to deploy a "Hello World" Azure Function to Azure Functions.
@@ -195,7 +194,4 @@ The project includes 5 comprehensive test cases:
 
 ## Contact
 
-For issues or questions regarding this assignment, please refer to the course materials or contact your instructor. 
-=======
-# assignment3-jenkins-azure
->>>>>>> c9b803d5814955d10b8bd6e395b74298b7f0ad15
+For issues or questions regarding this assignment, please refer to the course materials or contact your instructor.
